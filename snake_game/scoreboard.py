@@ -18,7 +18,7 @@ class Scoreboard(Turtle):
         self.color("red")
         self.goto(0, 0)
         self.write(
-            "You hit a wall, Game Over !", False, "center", ("Arial", 15, "bold")
+            "Game Over !", False, "center", ("Arial", 15, "bold")
         )
 
     def make_score(self):
