@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 from random import choice, randint, shuffle
+import json
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 
@@ -78,6 +79,24 @@ def generate_password():
     password_input.insert(0, password)
 
 
+# ---------------------------- SEARCH PASSWORD ------------------------------- #
+
+def search():
+    website = website_input.get()
+    try:
+        with open("password_manager/passwords.json", "r") as f:
+            data = json.load(f)
+            password_dict = data[website]
+    except KeyError:
+        messagebox.showinfo(message=f"No credentials for {website} exists")
+    except FileNotFoundError:
+        messagebox.showinfo(message="No Data File found")
+    else:
+        messagebox.showinfo(
+            message=f"Email {password_dict["email"]}\n Password: {password_dict["password"]}"
+        )
+
+
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 
 
@@ -89,15 +108,19 @@ def save_pass():
     if len(website) == 0 or len(email) == 0 or len(password) == 0:
         return messagebox.showwarning(message="Do not leave any field empty")
 
-    is_ok = messagebox.askokcancel(
-        title=website,
-        message=f"Email {email}\n Password: {password}\n Are you sure you want to save this data?",
-    )
+    new_data = {website: {"email": email, "password": password}}
 
-    if is_ok:
-        with open("password_manager/passwords.txt", "a") as f:
-            f.write(f"{website} | {email} | {password}\n")
-
+    try:
+        with open("password_manager/passwords.json", "r") as f:
+            data = json.load(f)
+    except:
+        with open("password_manager/passwords.json", "w") as f:
+            json.dump(new_data, f, indent=4)
+    else:
+        data.update(new_data)
+        with open("password_manager/passwords.json", "w") as f:
+            json.dump(data, f, indent=4)
+    finally:
         website_input.delete(0, END)
         email_input.delete(0, END)
         password_input.delete(0, END)
@@ -121,10 +144,14 @@ website_label = Label(text="Website:")
 
 website_label.grid(column=0, row=1)
 website_input = Entry(
-    width=35,
+    width=21,
 )
 website_input.focus()
-website_input.grid(column=1, columnspan=2, row=1)
+website_input.grid(column=1, row=1)
+
+
+search_button = Button(text="search", width=10, command=search)
+search_button.grid(column=2, row=1)
 
 
 email_label = Label(text="Email/Username:")
