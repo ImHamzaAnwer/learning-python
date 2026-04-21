@@ -1,2 +1,3 @@
 venv/
 oop-coffee-machine/
+.env
